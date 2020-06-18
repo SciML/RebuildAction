@@ -1,0 +1,14 @@
+{
+  "name": "rebuild-action",
+  "description": "Keeps content up to date",
+  "version": "0.1.0",
+  "dependencies": {
+    "@actions/core": "^1.2.4",
+    "@actions/github": "^3.0.0",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

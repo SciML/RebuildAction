@@ -1,0 +1,9 @@
+name: Rebuild Content
+author: Chris de Graaf
+description: Keep content up to date
+runs:
+  using: node12
+  main: rebuild.js
+branding:
+  icon: package
+  color: red
