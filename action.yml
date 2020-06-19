@@ -1,6 +1,10 @@
 name: Rebuild Content
 author: Chris de Graaf
 description: Keep content up to date
+inputs:
+  token:
+    description: GitHub API token
+    required: true
 runs:
   using: node12
   main: rebuild.js

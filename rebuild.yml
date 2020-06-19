@@ -8,8 +8,9 @@ setup:
     - triggers
   image: python
   script: |
+    wget https://raw.githubusercontent.com/SciML/RebuildAction/master/pipeline.py
     pip install pyyaml
-    python make_pipeline.py > rebuild.yml
+    python pipeline.py > rebuild.yml
   artifacts:
     paths:
       - rebuild.yml

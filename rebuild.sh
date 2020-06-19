@@ -3,6 +3,7 @@
 set -euxo pipefail
 
 git checkout "$FROM"
+
 julia -e "
   using Pkg
   Pkg.instantiate()
@@ -20,7 +21,10 @@ chmod 400 "$SSH_KEY"
 git config core.sshCommand "ssh -o StrictHostKeyChecking=no -i $SSH_KEY"
 git config user.name "github-actions[bot]"
 git config user.email "actions@github.com"
+git stash -u
 git checkout "$TO" 2> /dev/null || git checkout -b "$TO"
-git commit -am "Rebuild content"
 git remote add github "git@github.com:$GITHUB_REPOSITORY.git"
+git pull github "$TO" || true
+git stash pop
+git commit -am "Rebuild content"
 git push github "$TO"
