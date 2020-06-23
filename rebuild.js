@@ -42,7 +42,7 @@ const main = async () => {
 
 const onIssueComment = async () => {
   if (!isFork() && EVENT.comment.body.startsWith("!rebuild")) {
-    if (EVENT.comment.author_association in ["OWNER", "MEMBER", "COLLABORATOR"]) {
+    if (["OWNER", "MEMBER", "COLLABORATOR"].includes(EVENT.comment.author_association)) {
       const options = parseComment();
       const resp = await triggerJob(options);
       if (resp.ok) {
