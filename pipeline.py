@@ -9,8 +9,9 @@ import yaml
 def env_list(k):
     return [s.strip() for s in os.getenv(k, "").split(",") if s]
 
-exclude = env_list("EXCLUDE")
-needs_gpu = env_list("NEEDS_GPU")
+
+exclude = [x if x.endswith(".jmd") else f"{x}.jmd" for x in env_list("EXCLUDE")]
+needs_gpu = [x if x.endswith(".jmd") else f"{x}.jmd" for x in env_list("NEEDS_GPU")]
 tags = env_list("TAGS")
 
 package = os.getenv("JULIA_PACKAGE")
@@ -21,7 +22,7 @@ if not package:
 
 
 def make_job(folder, file):
-    job_tags = tags
+    job_tags = tags.copy()
     if f"{folder}/{file}" in needs_gpu:
         job_tags.append("nvidia")
     script_env = {
