@@ -10,6 +10,7 @@ def env_list(k):
     return [s.strip() for s in os.getenv(k, "").split(",") if s]
 
 
+gpu_tag = os.getenv("GPU_TAG", "nvidia")
 exclude = [x if x.endswith(".jmd") else f"{x}.jmd" for x in env_list("EXCLUDE")]
 needs_gpu = [x if x.endswith(".jmd") else f"{x}.jmd" for x in env_list("NEEDS_GPU")]
 tags = env_list("TAGS")
@@ -24,7 +25,7 @@ if not package:
 def make_job(folder, file):
     job_tags = tags.copy()
     if f"{folder}/{file}" in needs_gpu:
-        job_tags.append("nvidia")
+        job_tags.append(gpu_tag)
     script_env = {
         "FILE": file,
         "FOLDER": folder,
