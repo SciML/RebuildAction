@@ -7,7 +7,7 @@ echo "$k" > "$SSH_KEY"
 set -x
 chmod 400 "$SSH_KEY"
 git config core.sshCommand "ssh -o StrictHostKeyChecking=no -i $SSH_KEY"
-git remote add github "git@github.com:$GITHUB_REPOSITORY.git" || true
+git remote add github "git@github.com:$GITHUB_REPOSITORY.git" 2> /dev/null || true
 git fetch github
 git checkout "$FROM"
 
@@ -27,7 +27,7 @@ git config user.name "github-actions[bot]"
 git config user.email "actions@github.com"
 git stash -u
 git checkout "$TO" 2> /dev/null || git checkout -b "$TO"
-git pull github "$TO" || true
+git pull github "$TO" 2> /dev/null || true
 git stash pop
 git commit -am "Rebuild $FOLDER/$FILE"
 git push github "$TO"
