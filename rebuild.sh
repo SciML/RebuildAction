@@ -26,5 +26,5 @@ git checkout "$TO" 2> /dev/null || git checkout -b "$TO"
 git remote add github "git@github.com:$GITHUB_REPOSITORY.git"
 git pull github "$TO" || true
 git stash pop
-git commit -am "Rebuild content"
+git commit -am "Rebuild $FOLDER/$FILE"
 git push github "$TO"
