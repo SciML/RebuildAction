@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
-set -euxo pipefail
+set -euo pipefail
 
 k="$(cat $SSH_KEY)"
 echo "$k" > "$SSH_KEY"
+set -x
 chmod 400 "$SSH_KEY"
 git config core.sshCommand "ssh -o StrictHostKeyChecking=no -i $SSH_KEY"
 git remote add github "git@github.com:$GITHUB_REPOSITORY.git" || true
