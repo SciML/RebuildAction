@@ -5,6 +5,7 @@ set -euxo pipefail
 git checkout "$FROM"
 
 julia -e "
+  pushfirst!(LOAD_PATH, \"@.\")
   using Pkg
   Pkg.instantiate()
   using $PACKAGE: weave_file
