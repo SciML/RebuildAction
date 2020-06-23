@@ -41,15 +41,18 @@ const main = async () => {
 };
 
 const onIssueComment = async () => {
-  // TODO: Access control (author.owner_association).
   if (!isFork() && EVENT.comment.body.startsWith("!rebuild")) {
-    const options = parseComment();
-    const resp = await triggerJob(options);
-    if (resp.ok) {
-      const body = await resp.json();
-      replyToComment(`Created pipeline: [see it here](${body.web_url}).`);
+    if (EVENT.comment.author_association in ["OWNER", "MEMBER", "COLLABORATOR"]) {
+      const options = parseComment();
+      const resp = await triggerJob(options);
+      if (resp.ok) {
+        const body = await resp.json();
+        replyToComment(`Created pipeline: [see it here](${body.web_url}).`);
+      } else {
+        replyToComment("Triggering the pipeline failed.");
+      }
     } else {
-      replyToComment("Triggering the pipeline failed.");
+      replyToComment("You're not allowed to do that.");
     }
   } else {
     console.log("Ignoring irrelevant issue comment event");
