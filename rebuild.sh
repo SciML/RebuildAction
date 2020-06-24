@@ -9,7 +9,7 @@ chmod 400 "$SSH_KEY"
 git config core.sshCommand "ssh -o StrictHostKeyChecking=no -i $SSH_KEY"
 git remote add github "git@github.com:$GITHUB_REPOSITORY.git" 2> /dev/null || true
 git fetch github
-git checkout "$FROM"
+git checkout "github/$FROM"
 
 julia -e "
   pushfirst!(LOAD_PATH, \"@.\")
@@ -23,11 +23,12 @@ if [[ -z "$(git status -suno)" ]]; then
   exit 0
 fi
 
+branch="$(head -c8 /dev/urandom | base64)"
 git config user.name "github-actions[bot]"
 git config user.email "actions@github.com"
 git stash -u
-git checkout "$TO" 2> /dev/null || git checkout -b "$TO"
+git checkout -b "$branch" "github/$TO" 2> /dev/null || git checkout -b "$branch"
 git pull github "$TO" 2> /dev/null || true
 git stash pop
 git commit -am "Rebuild $FOLDER/$FILE"
-git push github "$TO"
+git push github "$branch:$TO"
