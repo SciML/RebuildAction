@@ -6,7 +6,7 @@ setup:
   stage: setup
   only:
     - triggers
-  image: python
+  image: python:alpine
   script: |
     wget https://raw.githubusercontent.com/SciML/RebuildAction/master/pipeline.py
     pip install pyyaml
