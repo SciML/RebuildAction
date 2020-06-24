@@ -34,9 +34,6 @@ const main = async () => {
   case "schedule":
     onSchedule();
     break;
-  case "status":
-    onStatus();
-    break;
   }
 };
 
@@ -98,14 +95,6 @@ const onPush = () => {
 
 const onSchedule = () => triggerJob();
 
-const onStatus = () => {
-  if (EVENT.context === "ci/gitlab/gitlab.com" && EVENT.state === "failure") {
-    updateStatus();
-  } else {
-    console.log("Ignoring irrelevant status event");
-  }
-};
-
 const randomId = () => {
   let s = Math.round(0xffffffff * Math.random()).toString(16);
   while (s.length < 8) {
@@ -154,18 +143,6 @@ const openPR = async () => {
   } else {
     console.log("PR already exists");
   }
-};
-
-const updateStatus = () => {
-  console.log("Updating commit status");
-  CLIENT.repos.createCommitStatus({
-    ...REPO,
-    sha: EVENT.sha,
-    state: "success",
-    context: EVENT.context,
-    description: "This status can be ignored",
-    target_url: EVENT.target_url,
-  });
 };
 
 if (!module.parent) {
