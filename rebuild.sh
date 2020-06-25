@@ -30,5 +30,6 @@ git stash -u
 git checkout -b "$branch" "github/$TO" 2> /dev/null || git checkout -b "$branch"
 git pull github "$TO" 2> /dev/null || true
 git stash pop
-git commit -am "Rebuild $FOLDER/$FILE"
+git add .
+git commit -m "Rebuild $FOLDER/$FILE"
 git push github "$branch:$TO"
