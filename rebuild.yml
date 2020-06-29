@@ -24,5 +24,3 @@ rebuild:
       - artifact: rebuild.yml
         job: setup
     strategy: depend
-  variables:  # TODO: Delete after JuliaGPU/gitlab-ci#20
-    JULIA_PROJECT: "@."

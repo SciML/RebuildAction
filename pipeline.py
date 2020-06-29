@@ -43,6 +43,7 @@ def make_job(folder, file):
         "variables": {
             "CI_APT_INSTALL": "gfortran git python3-dev texlive-full",
             "JULIA_NUM_THREADS": 4,
+            "JULIA_PROJECT": "@.",
         },
         "tags": job_tags,
         "script": script,
