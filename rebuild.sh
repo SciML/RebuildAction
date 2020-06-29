@@ -23,7 +23,7 @@ if [[ -z "$(git status -suno)" ]]; then
   exit 0
 fi
 
-branch="$(head -c8 /dev/urandom | base64)"
+branch="$(head -c8 /dev/urandom | md5sum | cut -d' ' -f1)"
 git config user.name "github-actions[bot]"
 git config user.email "actions@github.com"
 git stash -u
