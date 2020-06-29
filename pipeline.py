@@ -24,26 +24,21 @@ if not package:
 
 def make_job(folder, file):
     job_tags = tags.copy()
-    if f"{folder}/{file}" in needs_gpu:
+    if f"{folder}/{file}" in needs_gpu and gpu_tag not in job_tags:
         job_tags.append(gpu_tag)
-    script_env = {
-        "FILE": file,
-        "FOLDER": folder,
-        "FROM": os.environ["FROM"],
-        "PACKAGE": package,
-        "TO": os.environ["TO"],
-    }
-    script = "\n".join(f"export {k}={v}" for (k, v) in script_env.items())
-    script += """
-    wget https://raw.githubusercontent.com/SciML/RebuildAction/master/rebuild.sh
-    bash rebuild.sh
-    """
+    url = "https://raw.githubusercontent.com/SciML/RebuildAction/master/rebuild.sh"
+    script = f"wget -O - {url} | bash"
     return {
         "extends": ".julia:1.4",
         "variables": {
             "CI_APT_INSTALL": "gfortran git python3-dev texlive-full",
             "JULIA_NUM_THREADS": 4,
             "JULIA_PROJECT": "@.",
+            "FILE": file,
+            "FOLDER": folder,
+            "FROM": os.environ["FROM"],
+            "PACKAGE": package,
+            "TO": os.environ["TO"],
         },
         "tags": job_tags,
         "script": script,
