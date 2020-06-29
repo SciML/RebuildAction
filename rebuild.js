@@ -107,11 +107,12 @@ const triggerJob = options => {
   options = options || {};
   console.log(options);
   const form = new URLSearchParams();
-  form.append("ref", EVENT.repository.default_branch);
+  const ref = EVENT.repository && EVENT.repository.default_branch || BRANCH;
+  form.append("ref", ref);
   form.append("token", process.env.GITLAB_TOKEN);
   form.append("variables[FILE]", options.file || "");
   form.append("variables[FOLDER]", options.folder || "");
-  form.append("variables[FROM]", options.from || EVENT.repository.default_branch);
+  form.append("variables[FROM]", options.from || ref);
   form.append("variables[TO]", options.to || `rebuild/${randomId()}`);
   const project = process.env.GITLAB_PROJECT;
   const url = `https://gitlab.com/api/v4/projects/${project}/trigger/pipeline`;
