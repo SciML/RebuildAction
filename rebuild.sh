@@ -18,7 +18,7 @@ julia -e "
   using $PACKAGE: weave_file
   weave_file(\"$FOLDER\", \"$FILE\")"
 
-if [[ -z "$(git status -suno)" ]]; then
+if [[ -z "$(git status -s)" ]]; then
   echo "No changes"
   exit 0
 fi
