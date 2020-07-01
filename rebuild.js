@@ -87,7 +87,7 @@ const isPullRequest = () => EVENT.issue && EVENT.issue.pull_request !== undefine
 
 const onPush = () => {
   if (BRANCH.startsWith("rebuild/")) {
-    openPR();
+    openOrUpdatePR();
   } else {
     console.log("Ignoring irrelevant push event");
   }
@@ -128,21 +128,28 @@ const replyToComment = message => {
   });
 };
 
-const openPR = async () => {
+const updatedContent = () => EVENT.head_commit.message.split(" ").slice(1).join(" ");
+
+const openOrUpdatePR = async () => {
   const prs = await CLIENT.pulls.list({
     ...REPO,
     head: `${REPO.owner}:${BRANCH}`,
   });
   if (prs.data.length === 0) {
-    console.log("Creating PR")
+    console.log("Creating PR");
     CLIENT.pulls.create({
       ...REPO,
-      title: "Rebuild content",
+      title: `Rebuild ${updatedContent()}`,
       head: BRANCH,
       base: EVENT.repository.default_branch,
     });
   } else {
-    console.log("PR already exists");
+    console.log("Updating PR");
+    CLIENT.pulls.update({
+      ...REPO,
+      pull_number: prs.data[0].number,
+      title: `${prs.data[0].title}, ${updatedContent()}`,
+    });
   }
 };
 
