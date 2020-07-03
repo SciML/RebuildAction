@@ -1,15 +1,15 @@
 const { readFileSync } = require("fs");
 
-const core = require('@actions/core');
+const core = require("@actions/core");
 const fetch = require("node-fetch");
-const github = require("@actions/github");
+const { getOctokit } = require("@actions/github");
 
-const CLIENT = github.getOctokit(core.getInput("token"));
+const CLIENT = getOctokit(core.getInput("token"));
 const EVENT = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH));
 const REPO = {
   owner: process.env.GITHUB_REPOSITORY.split("/")[0],
   repo: process.env.GITHUB_REPOSITORY.split("/")[1],
-}
+};
 
 let BRANCH;
 
@@ -86,7 +86,9 @@ const isFork = () => isPullRequest() && EVENT.issue.pull_request.head !== undefi
 const isPullRequest = () => EVENT.issue && EVENT.issue.pull_request !== undefined;
 
 const onPush = () => {
-  if (BRANCH.startsWith("rebuild/")) {
+  if (/^rebuild\/[a-f0-9]{8}-done$/.test(BRANCH)) {
+    notifyPipelineDone();
+  } else if (/^rebuild\/[a-f0-9]{8}$/.test(BRANCH)) {
     openOrUpdatePR();
   } else {
     console.log("Ignoring irrelevant push event");
@@ -130,25 +132,42 @@ const replyToComment = message => {
 
 const updatedContent = () => EVENT.head_commit.message.split(" ").slice(1).join(" ");
 
-const openOrUpdatePR = async () => {
+const getPR = async branch => {
   const prs = await CLIENT.pulls.list({
     ...REPO,
-    head: `${REPO.owner}:${BRANCH}`,
+    head: `${REPO.owner}:${branch}`,
   });
-  if (prs.data.length === 0) {
+  return prs.data.length === 0 ? undefined : prs.data[0];
+};
+
+const notifyPipelineDone = async () => {
+  const pr = await getPR(BRANCH.slice(0, 16));
+  const url = EVENT.head_commit.message;
+  console.log("Pipeline is done, adding comment");
+  CLIENT.issues.createComment({
+    ...REPO,
+    issue_number: pr.number,
+    body: `Pipeline is finished: [see it here](${url}).`,
+  });
+};
+
+const openOrUpdatePR = async () => {
+  const pr = await getPR(BRANCH);
+  if (pr) {
+    console.log("Updating PR");
+    CLIENT.pulls.update({
+      ...REPO,
+      pull_number: pr.number,
+      title: `${pr.title}, ${updatedContent()}`,
+    });
+  } else {
     console.log("Creating PR");
     CLIENT.pulls.create({
       ...REPO,
       title: `Rebuild ${updatedContent()}`,
+      body: "Pipeline is in progress, I'll comment here again when it's done.",
       head: BRANCH,
       base: EVENT.repository.default_branch,
-    });
-  } else {
-    console.log("Updating PR");
-    CLIENT.pulls.update({
-      ...REPO,
-      pull_number: prs.data[0].number,
-      title: `${prs.data[0].title}, ${updatedContent()}`,
     });
   }
 };

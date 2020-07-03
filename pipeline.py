@@ -13,6 +13,7 @@ def env_list(k):
 gpu_tag = os.getenv("GPU_TAG", "nvidia")
 exclude = [x if x.endswith(".jmd") else f"{x}.jmd" for x in env_list("EXCLUDE")]
 needs_gpu = [x if x.endswith(".jmd") else f"{x}.jmd" for x in env_list("NEEDS_GPU")]
+sh_url = "https://raw.githubusercontent.com/SciML/RebuildAction/master/rebuild.sh"
 tags = env_list("TAGS")
 
 package = os.getenv("JULIA_PACKAGE")
@@ -26,8 +27,6 @@ def make_job(folder, file):
     job_tags = tags.copy()
     if f"{folder}/{file}" in needs_gpu and gpu_tag not in job_tags:
         job_tags.append(gpu_tag)
-    url = "https://raw.githubusercontent.com/SciML/RebuildAction/master/rebuild.sh"
-    script = f"wget -O - {url} | bash"
     return {
         "extends": ".julia:1.4",
         "variables": {
@@ -41,7 +40,8 @@ def make_job(folder, file):
             "TO": os.environ["TO"],
         },
         "tags": job_tags,
-        "script": script,
+        "allow_failure": True,
+        "script": f"wget -O - {sh_url} | bash",
     }
 
 
@@ -72,6 +72,21 @@ pipeline = {
     f"rebuild-{folder}-{file}": make_job(folder, file)
     for (folder, file) in jobs
 }
-pipeline["include"] = "https://raw.githubusercontent.com/JuliaGPU/gitlab-ci/master/templates/v6.yml"
+pipeline = {
+    **pipeline,
+    "include": "https://raw.githubusercontent.com/JuliaGPU/gitlab-ci/master/templates/v6.yml",
+    "done": {
+        "stage": ".post",
+        "image": "ubuntu",
+        "script": [
+            "apt-get -y update",
+            "apt-get -y install git wget",
+            f"wget -O - {sh_url} | bash -s done",
+        ],
+        "variables": {
+            "TO": os.environ["TO"],
+        },
+    },
+}
 
 yaml.dump(pipeline, sys.stdout)
