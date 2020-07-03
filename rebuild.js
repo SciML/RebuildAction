@@ -152,19 +152,24 @@ const notifyPipelineDone = async () => {
 };
 
 const openOrUpdatePR = async () => {
+  const content = updatedContent();
   const pr = await getPR(BRANCH);
   if (pr) {
-    console.log("Updating PR");
-    CLIENT.pulls.update({
-      ...REPO,
-      pull_number: pr.number,
-      title: `${pr.title}, ${updatedContent()}`,
-    });
+    if (pr.title.indexOf(content) == -1) {
+      console.log("Updating PR");
+      CLIENT.pulls.update({
+        ...REPO,
+        pull_number: pr.number,
+        title: `${pr.title}, ${content}`,
+      });
+    } else {
+      console.log("PR title already contains content");
+    }
   } else {
     console.log("Creating PR");
     CLIENT.pulls.create({
       ...REPO,
-      title: `Rebuild ${updatedContent()}`,
+      title: `Rebuild ${content}`,
       body: "Pipeline is in progress, I'll comment here again when it's done.",
       head: BRANCH,
       base: EVENT.repository.default_branch,
