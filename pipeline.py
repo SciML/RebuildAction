@@ -31,7 +31,7 @@ def make_job(folder, file):
         "extends": ".julia:1.4",
         "variables": {
             "CI_APT_INSTALL": "gfortran git python3-dev texlive-full",
-            "JULIA_NUM_THREADS": 4,
+            "JULIA_NUM_THREADS": 8,
             "JULIA_PROJECT": "@.",
             "FILE": file,
             "FOLDER": folder,
