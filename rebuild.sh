@@ -12,6 +12,8 @@ git fetch github
 git config user.name "github-actions[bot]"
 git config user.email "actions@github.com"
 
+unset LD_LIBRARY_PATH
+
 if [[ "${1:-}" == "done" ]]; then
   branch="$TO-done"
   git checkout -b "$branch"
