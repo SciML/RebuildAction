@@ -29,8 +29,9 @@ def make_job(folder, file):
         job_tags.append(gpu_tag)
     return {
         "extends": ".julia:1.4",
+        "image": "ubuntu",
         "variables": {
-            "CI_APT_INSTALL": "build-essential gfortran git python3-dev",
+            "CI_APT_INSTALL": "build-essential gfortran git",
             "JULIA_NUM_THREADS": 8,
             "CONTENT_DIR": os.environ["CONTENT_DIR"],
             "FILE": file,
