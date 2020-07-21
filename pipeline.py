@@ -32,7 +32,7 @@ def make_job(folder, file):
         "variables": {
             "CI_APT_INSTALL": "build-essential gfortran git python3-dev texlive-full",
             "JULIA_NUM_THREADS": 8,
-            "JULIA_PROJECT": "@.",
+            "CONTENT_DIR": os.environ["CONTENT_DIR"],
             "FILE": file,
             "FOLDER": folder,
             "FROM": os.environ["FROM"],

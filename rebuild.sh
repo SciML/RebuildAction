@@ -22,12 +22,11 @@ if [[ "${1:-}" == "done" ]]; then
 else
   git checkout "github/$FROM"
 
-  julia -e "
-  pushfirst!(LOAD_PATH, \"@.\")
-  using Pkg
-  Pkg.instantiate()
-  using $PACKAGE: weave_file
-  weave_file(\"$FOLDER\", \"$FILE\")"
+  julia --project -e 'using Pkg; Pkg.instantiate()'
+  julia --project="$CONTENT_DIR/$FOLDER" -e 'using Pkg; Pkg.instantiate()'
+  JULIA_LOAD_PATH="$(pwd):${JULIA_LOAD_PATH:-}" julia -e "
+    using $PACKAGE: weave_file
+    weave_file(\"$FOLDER\", \"$FILE\")"
 
   if [[ -z "$(git status -s)" ]]; then
     echo "No changes"
