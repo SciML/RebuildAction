@@ -29,7 +29,7 @@ def make_job(folder, file):
         job_tags.append(gpu_tag)
     return {
         "extends": ".julia:1.4",
-        "image": "ubuntu",
+        "image": "nvidia/cuda:10.2-devel-ubuntu18.04",
         "variables": {
             "CI_APT_INSTALL": "build-essential gfortran git",
             "JULIA_NUM_THREADS": 8,
