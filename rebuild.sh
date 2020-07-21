@@ -13,7 +13,7 @@ git config user.name "github-actions[bot]"
 git config user.email "actions@github.com"
 
 unset LD_LIBRARY_PATH
-rm /etc/ld.so.conf.d/nvidia.conf
+rm -f /etc/ld.so.conf.d/nvidia.conf
 
 if [[ "${1:-}" == "done" ]]; then
   branch="$TO-done"
