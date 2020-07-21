@@ -13,7 +13,7 @@ def env_list(k):
 gpu_tag = os.getenv("GPU_TAG", "nvidia")
 exclude = [x if x.endswith(".jmd") else f"{x}.jmd" for x in env_list("EXCLUDE")]
 needs_gpu = [x if x.endswith(".jmd") else f"{x}.jmd" for x in env_list("NEEDS_GPU")]
-sh_url = "https://raw.githubusercontent.com/SciML/RebuildAction/master/rebuild.sh"
+sh_url = "https://raw.githubusercontent.com/SciML/RebuildAction/dev/rebuild.sh"
 tags = env_list("TAGS")
 
 package = os.getenv("JULIA_PACKAGE")
