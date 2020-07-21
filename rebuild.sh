@@ -13,6 +13,7 @@ git config user.name "github-actions[bot]"
 git config user.email "actions@github.com"
 
 unset LD_LIBRARY_PATH
+unset LIBRARY_PATH
 rm -f /etc/ld.so.conf.d/nvidia.conf
 
 if [[ "${1:-}" == "done" ]]; then
