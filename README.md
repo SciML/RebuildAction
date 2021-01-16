@@ -1,16 +1,17 @@
 # RebuildAction
 
-A GitHub Action + GitLab CI pipeline for rebuilding content.
+A GitHub Action + Buildkite pipeline for rebuilding content.
 
 ## Setup
 
-First, import your project into JuliaGPU on GitLab as described [here](https://github.com/JuliaGPU/gitlab-ci).
+First, import your project into the Julia Buildkite account as described [here](https://github.com/JuliaGPU/buildkite).
 
-Next, add a `.gitlab-ci.yml` file to your repository with the following contents:
+Next, add a `.buildkite/pipeline.yml` file to your repository with the following contents:
 
 ```yml
-include: https://raw.githubusercontent.com/SciML/RebuildAction/master/rebuild.yml
-variables:
+steps:
+  - command: curl https://raw.githubusercontent.com/SciML/RebuildAction/master/rebuild.yml | buildkite-agent upload
+    env:
   CONTENT_DIR: mycontent  # Directory holding your source content.
   GITHUB_REPOSITORY: Owner/Repo  # GitHub user/repository name (no .git).
   # The following are optional.
@@ -33,8 +34,8 @@ on:
       - created
   push:
 env:
-  GITLAB_PROJECT: ${{ secrets.GITLAB_PROJECT }}
-  GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+  BUILDKITE_PROJECT: ${{ secrets.BUILDKITE_PROJECT }}
+  BUILDKITE_TOKEN: ${{ secrets.BUILDKITE_TOKEN }}
 jobs:
   Rebuild:
     runs-on: ubuntu-latest
@@ -48,7 +49,7 @@ Next, generate an SSH key pair with `ssh-keygen`.
 Add the public key as a deploy key with write permissions to your GitHub repo.
 Then, add the private key as a [File environment variable](https://docs.gitlab.com/ee/ci/variables/README.html#custom-environment-variables-of-type-file) with the name `SSH_KEY` in GitLab.
 
-Now, find your GitLab project ID and add it as a GitHub secret called `GITLAB_PROJECT`.
+Now, find your Buildkite project ID and add it as a GitHub secret called `GITLAB_PROJECT`.
 
 Then create a Gitlab [pipeline trigger](https://docs.gitlab.com/ee/ci/triggers/#adding-a-new-trigger) and add the token as a GitHub secret called `GITLAB_TOKEN`.
 
