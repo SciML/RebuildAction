@@ -15,7 +15,7 @@ git config user.email "actions@github.com"
 if [[ "${1:-}" == "done" ]]; then
   branch="$TO-done"
   git checkout -b "$branch"
-  git commit --allow-empty -m "$CI_PIPELINE_URL"
+  git commit --allow-empty -m "$BUILDKITE_BUILD_URL"
   git push github "$branch"
   sleep 10
   git push --delete github "$branch"

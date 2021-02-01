@@ -10,7 +10,7 @@ def env_list(k):
     return [s.strip() for s in os.getenv(k, "").split(",") if s]
 
 
-gpu_tag = os.getenv("GPU_TAG", "nvidia")
+gpu_queue = os.getenv("GPU_QUEUE", "juliagpu")
 exclude = [x if x.endswith(".jmd") else f"{x}.jmd" for x in env_list("EXCLUDE")]
 needs_gpu = [x if x.endswith(".jmd") else f"{x}.jmd" for x in env_list("NEEDS_GPU")]
 sh_url = "https://raw.githubusercontent.com/SciML/RebuildAction/master/rebuild.sh"
@@ -24,24 +24,38 @@ if not package:
 
 
 def make_job(folder, file):
-    job_tags = tags.copy()
-    if f"{folder}/{file}" in needs_gpu and gpu_tag not in job_tags:
-        job_tags.append(gpu_tag)
+    # job_tags = tags.copy()
+    if f"{folder}/{file}" in needs_gpu:
+        queue = os.getenv("GPU_QUEUE", "juliagpu")
+    else:
+        queue = os.getenv("CPU_QUEUE", "juliacpu")
+    julia = os.environ["JULIA_VERSION"]
     return {
-        "extends": ".julia:1.4",
-        "variables": {
+        "command": f"wget -O - {sh_url} | bash",
+        "label": f"rebuild-{folder}-{file}",
+        "agents": {
+            "queue": queue,
+        },
+        "env": {
             "CI_APT_INSTALL": "build-essential gfortran git python3-dev texlive-full",
-            "JULIA_NUM_THREADS": 8,
             "CONTENT_DIR": os.environ["CONTENT_DIR"],
+            "JULIA_NUM_THREADS": 8,
+            "PACKAGE": package,
             "FILE": file,
             "FOLDER": folder,
             "FROM": os.environ["FROM"],
-            "PACKAGE": package,
             "TO": os.environ["TO"],
         },
-        "tags": job_tags,
-        "allow_failure": True,
-        "script": f"wget -O - {sh_url} | bash",
+        "plugins": [
+            {
+                "docker#v3.7.0": {
+                    "image": f"julia:{julia}",
+                    "volumes": [
+                        ""
+                    ],
+                },
+            },
+        ],
     }
 
 
@@ -68,16 +82,30 @@ else:
 os.chdir(cwd)
 
 
-pipeline = {
-    f"rebuild-{folder}-{file}": make_job(folder, file)
-    for (folder, file) in jobs
-}
-pipeline = {
-    **pipeline,
-    "include": "https://raw.githubusercontent.com/JuliaGPU/gitlab-ci/master/templates/v6.yml",
-    "done": {
-        "stage": ".post",
-        "image": "ubuntu",
+pipeline = [make_job(folder, file) for (folder, file) in jobs]
+pipeline.append({
+    "wait": {
+        "allow_dependency_failure": True,
+    },
+})
+pipeline.append({
+    "command": [
+        "apt-get -y update",
+        "apt-get -y install git wget",
+        f"wget -O - {sh_url} | bash -s done",
+    ],
+    "plugins": [
+        {
+            "docker#v3.7.0": {
+                "image": "ubuntu",
+                "volumes": [
+                    ""
+                ],
+            },
+        },
+    ],
+
+    "image": "ubuntu",
         "script": [
             "apt-get -y update",
             "apt-get -y install git wget",

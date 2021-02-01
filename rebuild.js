@@ -108,17 +108,23 @@ const randomId = () => {
 const triggerJob = options => {
   options = options || {};
   console.log(options);
-  const form = new URLSearchParams();
-  const ref = EVENT.repository && EVENT.repository.default_branch || BRANCH;
-  form.append("ref", ref);
-  form.append("token", process.env.GITLAB_TOKEN);
-  form.append("variables[FILE]", options.file || "");
-  form.append("variables[FOLDER]", options.folder || "");
-  form.append("variables[FROM]", options.from || ref);
-  form.append("variables[TO]", options.to || `rebuild/${randomId()}`);
-  const project = process.env.GITLAB_PROJECT;
-  const url = `https://gitlab.com/api/v4/projects/${project}/trigger/pipeline`;
-  return fetch(url, { method: "POST", body: form });
+  const url = `https://api.buildkite.com/v2/organizations/julialang/pipelines/${process.env.BUILDKITE_PROJECT}/builds`;
+  const branch = EVENT.repository && EVENT.repository.default_branch || BRANCH;
+  return fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${process.env.BUILDKITE_TOKEN}` },
+    body: {
+      branch: branch,
+      commit: "HEAD",
+      env: {
+        // TODO: Might still need the || ""
+        file: options.file,
+        folder: options.folder,
+        from: options.from || branch,
+        to: options.to || `rebuild/${randomId()}`,
+      },
+    },
+  });
 };
 
 const replyToComment = message => {
